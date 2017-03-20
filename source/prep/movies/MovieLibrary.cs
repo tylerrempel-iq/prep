@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using code.utility;
+using code.utility.matching;
 
 namespace code.prep.movies
 {
@@ -40,32 +42,32 @@ namespace code.prep.movies
 
     public IEnumerable<Movie> all_movies_published_by_pixar_or_disney()
     {
-        return movies.filter_using(x => x.production_studio == ProductionStudio.Pixar || x.production_studio == ProductionStudio.Disney);
+        return movies.filter_using(Movie.published_by(ProductionStudio.Pixar).or(Movie.published_by(ProductionStudio.Disney)));
     }
 
     public IEnumerable<Movie> all_movies_not_published_by_pixar()
     {
-        return movies.filter_using( movie => movie.production_studio != ProductionStudio.Pixar);
+        return movies.filter_using(Movie.published_by(ProductionStudio.Pixar));
     }
 
     public IEnumerable<Movie> all_movies_published_after(int year)
     {
-        return movies.filter_using( movie => movie.date_published.Year > year);
+        return movies.filter_using(Movie.published_after(year));
     }
 
     public IEnumerable<Movie> all_movies_published_between_years(int startingYear, int endingYear)
     {
-        return movies.filter_using( movie => movie.date_published.Year >= startingYear && movie.date_published.Year <= endingYear);
+        return movies.filter_using(Movie.published_after(startingYear).or(Movie.published_in(startingYear)).and(Movie.published_before(endingYear).or(Movie.published_in(endingYear))));
     }
 
     public IEnumerable<Movie> all_kid_movies()
     {
-        return movies.filter_using( movie => movie.genre == Genre.kids);
+        return movies.filter_using(Movie.in_genre(Genre.kids));
     }
 
     public IEnumerable<Movie> all_action_movies()
     {
-        return movies.filter_using( movie => movie.genre == Genre.action);
+        return movies.filter_using(Movie.in_genre(Genre.action));
     }
 
     public IEnumerable<Movie> sort_all_movies_by_title_descending()

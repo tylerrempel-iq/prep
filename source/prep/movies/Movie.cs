@@ -39,5 +39,19 @@ namespace code.prep.movies
       return new IsInGenre(genre);
     }
 
-  }
+    public static IMatchA<Movie> published_after(int year)
+    {
+      return new IsPublishedAfterYear(year);   
+    }
+
+    public static IMatchA<Movie> published_before(int year)
+    {
+        return new IsPublishedBeforeYear(year);
+    }
+
+    public static IMatchA<Movie> published_in(int year)
+    {
+        return new IsPublishedInYear(year);
+    }
+    }
 }
