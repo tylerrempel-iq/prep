@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using code.utility;
+using code.utility.matching;
 using developwithpassion.specifications.assertions.core;
 using developwithpassion.specifications.assertions.enumerables;
 using developwithpassion.specifications.assertions.type_specificity;
 using developwithpassion.specifications.extensions;
 using spec = developwithpassion.specifications.use_engine<Machine.Fakes.Adapters.Rhinomocks.RhinoFakeEngine>;
 using Machine.Specifications;
+using Rhino.Mocks;
 
 namespace code.prep.movies
 {
@@ -80,7 +83,7 @@ namespace code.prep.movies
         Enumerable.Range(1, 2).each(x => movie_collection.Add(new Movie()));
 
       Because b = () =>
-        number_of_movies = sut.all_movies().Count();
+        number_of_movies = sut.all().Count();
 
       It returns_the_number_of_all_movies_in_the_library = () =>
         number_of_movies.ShouldEqual(2);
@@ -103,7 +106,7 @@ namespace code.prep.movies
       };
 
       Because b = () =>
-        all_movies = sut.all_movies();
+        all_movies = sut.all();
 
       It returns_a_set_containing_each_movie_in_the_library = () =>
         all_movies.ShouldContainOnly(first_movie, second_movie);
@@ -125,7 +128,7 @@ namespace code.prep.movies
       };
 
       Because b = () =>
-        spec.catch_exception(() => sut.all_movies().downcast_to<IList<Movie>>());
+        spec.catch_exception(() => sut.all().downcast_to<IList<Movie>>());
 
       It throws_an_invalid_cast_exception = () =>
         spec.exception_thrown.should().be_an<InvalidCastException>();
@@ -192,49 +195,59 @@ namespace code.prep.movies
 
       It finds_all_movies_published_by_pixar = () =>
       {
-        var results = sut.all_movies_published_by_pixar();
+        var criteria = Match<Movie>.with_attribute(x => x.production_studio).equal_to(ProductionStudio.Pixar);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(cars, a_bugs_life);
       };
 
       It finds_all_movies_published_by_pixar_or_disney = () =>
       {
-        var results = sut.all_movies_published_by_pixar_or_disney();
+        var criteria = Match<Movie>.with_attribute(x => x.production_studio).equal_to_any(ProductionStudio.Pixar, ProductionStudio.Disney);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(a_bugs_life, pirates_of_the_carribean, cars);
       };
 
       It finds_all_movies_not_published_by_pixar = () =>
       {
-        var results = sut.all_movies_not_published_by_pixar();
+        var criteria = Match<Movie>.with_attribute(x => x.production_studio).not.equal_to(ProductionStudio.Pixar);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldNotContain(cars, a_bugs_life);
       };
 
       It finds_all_movies_published_after_a_certain_year = () =>
       {
-        var results = sut.all_movies_published_after(2004);
+        var criteria = Match<Movie>.with_attribute(x => x.date_published).greater_than(2004);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(yours_mine_and_ours, shrek, theres_something_about_mary);
       };
 
       It finds_all_movies_published_between_a_certain_range_of_years = () =>
       {
-        var results = sut.all_movies_published_between_years(1982, 2003);
+        var criteria = Match<Movie>.with_attribute(x => x.date_published.Year).between(1982,2003);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(indiana_jones_and_the_temple_of_doom, a_bugs_life, pirates_of_the_carribean);
       };
 
       It finds_all_kid_movies = () =>
       {
-        var results = sut.all_kid_movies();
+        var results = sut.all().filter_using(Match<Movie>.with_attribute(x => x.genre).equal_to(Genre.kids));
 
         results.ShouldContainOnly(a_bugs_life, shrek, cars);
       };
 
       It finds_all_action_movies = () =>
       {
-        var results = sut.all_action_movies();
+        var results = sut.all().filter_using(Match<Movie>.with_attribute(x => x.genre).equal_to(Genre.action));
 
         results.ShouldContainOnly(indiana_jones_and_the_temple_of_doom, pirates_of_the_carribean);
       };
