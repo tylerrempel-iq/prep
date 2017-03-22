@@ -21,5 +21,9 @@ configure({
   git: {
     user: 'iqmetrix_2017',
     provider: 'training'
-  }
+  },
+
+  database: {
+    host: '10.0.1.140'
+  },
 })
