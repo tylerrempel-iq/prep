@@ -51,3 +51,4 @@ x.clear_cached_node_packages
 /node_modules
 /packages
 /.bundle
+db/data

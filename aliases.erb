@@ -80,6 +80,51 @@ function _powershell(){
   start powershell -NoExit -WindowStyle normal -Command $*
 }
 
+function docker_stop_all() {
+  for container in $(docker ps -aq); 
+  do
+  docker stop $container
+  docker rm $container
+  done
+}
+
+# Docker workspaces
+
+# Workspace bound to the web.ui node docker environment - no links or service ports will be present
+alias web_ui_bare='docker-compose run --rm --no-deps web_ui'
+
+# Workspace bound to the web.ui node docker environment - includes linked environment and service ports
+alias seeder_workspace='docker-compose run --rm seeder /bin/bash'
+
+# Command aliases
+alias mix='docker-compose run --rm seeder mix'
+alias mysql='docker-compose run --rm seeder mysql'
+
+# Aliases used to connect to the app database
+alias db='mysql -u root -h db --password=iqmetrix'
+alias db_dev='db -D iqmetrix'
+
+# General aliases
+# Stop all running docker containers
+alias dsa='docker_stop_all' 
+
+# Run the script to seed the database
+alias seed='mix run priv/repo/seeds.exs' 
+
+# Run the script to rebuild the database
+alias rdb='mix ecto.drop && mix ecto.create && mix ecto.migrate;seed'
+
+# Stop all containers started by this folder docker-compose configuration
+alias down='docker-compose down'
+
+# Utility alias to run on a clean checkout
+function clean_slate() {
+  docker-compose run --rm seeder ping -c 1 -W 20000 db
+  mix deps.get
+  mix ecto.create
+  mix ecto.migrate
+}
+
 <% settings.extra_aliases.each do |the_alias| %>
 . <%= the_alias %>
 <% end %>
