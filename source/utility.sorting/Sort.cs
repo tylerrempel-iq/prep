@@ -5,17 +5,6 @@ namespace code.utility.sorting
 {
   public class Sort<Item>
   {
-    public static ICompareTwoItems<Item> by<Property>(IGetTheValueOfAProperty<Item, Property> accessor)
-    where Property : IComparable<Property>
-    {
-        return by(accessor, SortOrders.@ascending);
-    }
-
-    public static ICompareTwoItems<Item> by_descending<Property>(IGetTheValueOfAProperty<Item, Property> accessor)
-    where Property : IComparable<Property>
-    {
-        return by(accessor, SortOrders.@descending);
-    }
     public static ICompareTwoItems<Item> by<Property>(IGetTheValueOfAProperty<Item, Property> accessor,
       ICompareTwoItems<Property> order)
       where Property : IComparable<Property>
