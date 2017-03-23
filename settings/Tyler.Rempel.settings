@@ -12,6 +12,8 @@ configure({
     '/c/Program Files (x86)/Microsoft SDKs/Windows/v8.1A/bin/NETFX 4.5.1 Tools'
   ],
 
+  runner_processes: delayed{%W/#{settings.browser.base_name_without_extension} iisexpress node ruby powershell growl cmd/},
+  
   logging: {
     level: "DEBUG"
   },
