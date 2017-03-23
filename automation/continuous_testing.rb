@@ -54,7 +54,7 @@ module Automation
 
       while true do
         monitor
-        sleep(10)
+        sleep(settings.specs.continuous_testing.interval)
       end
     end
 
