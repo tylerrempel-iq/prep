@@ -1,4 +1,6 @@
-﻿namespace code.utility.containers
+﻿using System;
+
+namespace code.utility.containers
 {
   public interface ICreateOneDependency
   {
