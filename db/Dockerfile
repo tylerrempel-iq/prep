@@ -1,0 +1,3 @@
+FROM mysql
+ENV MYSQL_ROOT_PASSWORD iqmetrix
+ENV MYSQL_DATABASE iq_db

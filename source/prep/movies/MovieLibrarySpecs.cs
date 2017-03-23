@@ -1,17 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using code.utility;
+using code.utility.core;
+using code.utility.iteration;
+using code.utility.matching;
+using code.utility.sorting;
+using code.utility.visitors;
 using developwithpassion.specifications.assertions.core;
 using developwithpassion.specifications.assertions.enumerables;
 using developwithpassion.specifications.assertions.type_specificity;
 using developwithpassion.specifications.extensions;
-using spec = developwithpassion.specifications.use_engine<Machine.Fakes.Adapters.Rhinomocks.RhinoFakeEngine>;
 using Machine.Specifications;
+using spec = developwithpassion.specifications.use_engine<Machine.Fakes.Adapters.Rhinomocks.RhinoFakeEngine>;
 
 namespace code.prep.movies
 {
   [Subject(typeof(MovieLibrary))]
-  public class MovieLibrarySpecs 
+  public class MovieLibrarySpecs
   {
     /* The following set of Context/Specification pairs are in place to specify the functionality that you need to complete for the MovieLibrary class.
    * MovieLibrary is an collection of Movie. It exposes the ability to search,sort, and iterate over all of the movies that it contains.
@@ -77,14 +83,13 @@ namespace code.prep.movies
       static int number_of_movies;
 
       Establish c = () =>
-        Enumerable.Range(1, 2).each(x => movie_collection.Add(new Movie()));
+        Enumerable.Range(1, 2).each_for_all(x => movie_collection.Add(new Movie()));
 
       Because b = () =>
-        number_of_movies = sut.all_movies().Count();
+        number_of_movies = sut.all().Count();
 
       It returns_the_number_of_all_movies_in_the_library = () =>
         number_of_movies.ShouldEqual(2);
-        
     }
 
     public class asked_for_all_of_the_movies : movie_library_concern
@@ -103,7 +108,7 @@ namespace code.prep.movies
       };
 
       Because b = () =>
-        all_movies = sut.all_movies();
+        all_movies = sut.all();
 
       It returns_a_set_containing_each_movie_in_the_library = () =>
         all_movies.ShouldContainOnly(first_movie, second_movie);
@@ -125,7 +130,7 @@ namespace code.prep.movies
       };
 
       Because b = () =>
-        spec.catch_exception(() => sut.all_movies().downcast_to<IList<Movie>>());
+        spec.catch_exception(() => sut.all().downcast_to<IList<Movie>>());
 
       It throws_an_invalid_cast_exception = () =>
         spec.exception_thrown.should().be_an<InvalidCastException>();
@@ -192,49 +197,60 @@ namespace code.prep.movies
 
       It finds_all_movies_published_by_pixar = () =>
       {
-        var results = sut.all_movies_published_by_pixar();
+        var criteria = Match<Movie>.with_attribute(x => x.production_studio).equal_to(ProductionStudio.Pixar);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(cars, a_bugs_life);
       };
 
       It finds_all_movies_published_by_pixar_or_disney = () =>
       {
-        var results = sut.all_movies_published_by_pixar_or_disney();
+        var results = sut.all()
+          .filter(x => x.production_studio)
+          .equal_to_any(ProductionStudio.Pixar, ProductionStudio.Disney);
 
         results.ShouldContainOnly(a_bugs_life, pirates_of_the_carribean, cars);
       };
 
       It finds_all_movies_not_published_by_pixar = () =>
       {
-        var results = sut.all_movies_not_published_by_pixar();
+        var criteria = Match<Movie>.with_attribute(x => x.production_studio).not.equal_to(ProductionStudio.Pixar);
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldNotContain(cars, a_bugs_life);
       };
 
       It finds_all_movies_published_after_a_certain_year = () =>
       {
-        var results = sut.all_movies_published_after(2004);
+        var criteria = Match<Movie>.with_attribute(x => x.date_published.Year).falls_in(Range.after(2004, false));
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(yours_mine_and_ours, shrek, theres_something_about_mary);
       };
 
       It finds_all_movies_published_between_a_certain_range_of_years = () =>
       {
-        var results = sut.all_movies_published_between_years(1982, 2003);
+        var criteria =
+          Match<Movie>.with_attribute(x => x.date_published.Year).falls_in(Range.between(1982, true, 2003, true));
+
+        var results = sut.all().filter_using(criteria);
 
         results.ShouldContainOnly(indiana_jones_and_the_temple_of_doom, a_bugs_life, pirates_of_the_carribean);
       };
 
       It finds_all_kid_movies = () =>
       {
-        var results = sut.all_kid_movies();
+        var results = sut.all().filter_using(Match<Movie>.with_attribute(x => x.genre).equal_to(Genre.kids));
 
         results.ShouldContainOnly(a_bugs_life, shrek, cars);
       };
 
       It finds_all_action_movies = () =>
       {
-        var results = sut.all_action_movies();
+        var results = sut.all().filter_using(Match<Movie>.with_attribute(x => x.genre).equal_to(Genre.action));
 
         results.ShouldContainOnly(indiana_jones_and_the_temple_of_doom, pirates_of_the_carribean);
       };
@@ -249,7 +265,9 @@ namespace code.prep.movies
 
       It by_title_descending = () =>
       {
-        var results = sut.sort_all_movies_by_title_descending();
+        var comparer = Sort<Movie>.by_descending(x => x.title);
+
+        var results = sut.all().sort_using(comparer);
 
         results.should().contain_only_in_order(yours_mine_and_ours, theres_something_about_mary, shrek,
           pirates_of_the_carribean, indiana_jones_and_the_temple_of_doom,
@@ -258,7 +276,9 @@ namespace code.prep.movies
 
       It by_title_ascending = () =>
       {
-        var results = sut.sort_all_movies_by_title_ascending();
+        var comparer = Sort<Movie>.by(x => x.title);
+
+        var results = sut.all().sort_using(comparer);
 
         results.should().contain_only_in_order(a_bugs_life, cars, indiana_jones_and_the_temple_of_doom,
           pirates_of_the_carribean, shrek,
@@ -267,7 +287,9 @@ namespace code.prep.movies
 
       It by_date_published_descending = () =>
       {
-        var results = sut.sort_all_movies_by_date_published_descending();
+        var comparer = Sort<Movie>.by(x => x.date_published, SortOrders.descending);
+
+        var results = sut.all().sort_using(comparer);
 
         results.should().contain_only_in_order(theres_something_about_mary, shrek, yours_mine_and_ours, cars,
           pirates_of_the_carribean, a_bugs_life,
@@ -276,7 +298,9 @@ namespace code.prep.movies
 
       It by_date_published_ascending = () =>
       {
-        var results = sut.sort_all_movies_by_date_published_ascending();
+        var comparer = Sort<Movie>.by(x => x.date_published, SortOrders.ascending);
+
+        var results = sut.all().sort_using(comparer);
 
         results.should().contain_only_in_order(indiana_jones_and_the_temple_of_doom, a_bugs_life,
           pirates_of_the_carribean, cars, yours_mine_and_ours, shrek,
@@ -291,7 +315,15 @@ namespace code.prep.movies
         //Dreamworks
         //Universal
         //Disney
-        var results = sut.sort_all_movies_by_movie_studio_and_year_published();
+        var comparer = Sort<Movie>.by(x => x.production_studio,
+          ProductionStudio.MGM,
+          ProductionStudio.Pixar,
+          ProductionStudio.Dreamworks,
+          ProductionStudio.Universal,
+          ProductionStudio.Disney)
+          .then_by(x => x.date_published, SortOrders.ascending);
+
+        var results = sut.all().sort_using(comparer);
         /* should return a set of results 
                  * in the collection sorted by the rating of the production studio (not the movie rating) and year published. for this exercise you need to take the studio ratings
                  * into effect, which means that you first have to sort by movie studio (taking the ranking into account) and then by the
