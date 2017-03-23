@@ -18,10 +18,6 @@ module Automation
     end
 
     no_commands do
-      def clean_invoke(command)
-        invoke command, [], {}
-      end
-
       def initialize_settings_file
         clean_invoke 'automation:clean'
       end

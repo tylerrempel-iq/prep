@@ -1,0 +1,16 @@
+version: '2'
+services:
+  seeder:
+    build: seeder
+    volumes:
+      - ./seeder:/app
+    links:
+      - db
+    command: "mix"
+
+  db:
+    build: db
+    ports:
+      - "4001:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql

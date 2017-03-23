@@ -1,5 +1,6 @@
 module Automation
   class DynamicEdit < Thor
+    include ::Automation::Utils
     include ::Automation::InputUtils
     include ::Automation::Compile::CompileUnitResolution
     namespace :edit
@@ -9,11 +10,10 @@ module Automation
     desc 'edit', 'edit files in a compile unit'
     def edit
       unit = options[:compile_file] || pick_item_from(settings.compile_units, "Pick a compile unit to edit")
-      puts "Picked #{unit}"
       FileUtils.cp(settings.edit_project_template, edit_file)
       unit = get_compile_unit(unit)
       configure(compile_unit: unit)
-      invoke 'automation:expand'
+      clean_invoke 'automation:expand'
       FileUtils.rm edit_file
     end
 

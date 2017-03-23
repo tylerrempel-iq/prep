@@ -40,12 +40,8 @@ module Automation
         intermediary_path = unit.intermediary_path
 
         # FileUtils.cp_r(File.join(source_folder, "dist"), intermediary_path)
-        FileUtils.cp_r("source/assets", File.join(intermediary_path, "dist"))
-        FileUtils.cp_r(File.join(source_folder, "features"), intermediary_path)
         FileUtils.cp_r(File.join(source_folder, "Global.asax"), intermediary_path)
         FileUtils.cp_r(File.join(source_folder, "Global.asax.cs"), intermediary_path)
-        FileUtils.rm(File.join(intermediary_path, "features", "views.cs"))
-        FileUtils.rm(File.join(intermediary_path, "features", "views.cs.erb"))
 
         settings.config_files.each do |file|
           FileUtils.cp(file, intermediary_path)
