@@ -15,7 +15,12 @@ def filter_libs(libs)
       /Machine.Fakes.Adap/ !~ file &&
       /Oracle/ !~ file &&
       /mono/i !~ file &&
-      /android/i !~ file
+      /android/i !~ file &&
+      /System\./i !~ file &&
+      /SL3/i !~ file &&
+      /WP7/i !~ file &&
+      /\.resources/i !~ file &&
+      /Moq/i !~ file
   end
 
   libs
@@ -81,9 +86,8 @@ configure({
   },
 
   database: {
-    provider_for_migrations: 'SqlServer2014',
     name: 'code',
-    connection_string: 'Server=(LocalDB)\code;Integrated Security=true' 
+    host: 'localhost'
   },
 
   edit_project_template: 'source/edit.csproj.template',
@@ -105,7 +109,11 @@ configure({
 
   framework_references: [
     "System.dll",
-    "System.Runtime.dll",
+    "System.Configuration.dll",
+    "System.Data.dll",
+    "System.Security.dll",
+    "System.Xml.dll",
+    "System.Web.dll"
   ],
 
   iis_express: {
@@ -113,7 +121,7 @@ configure({
     present: true,
     enable_in_project_files: true,
     use_for_deploys: true,
-    path: 'e:\utils\iis_express\iisexpress.exe',
+    exe_path: File.expand_path('./automation/tools/iis_express/iisexpress.exe'),
   },
 
   libs: delayed do
@@ -161,7 +169,7 @@ configure({
 
     provider: 'github', #possible values [github, bitbucket]
 
-    remotes: %w//,
+    remotes: %w/CunningMatthew lncramer RyanMarcotte jeffthiele-iq wpetrowski NathanMagnus jesseh77 graham-sanipelli-iq cbigsby jamest-iqmetrix lastiriIQ garrettsamm-iq chrisventura tylerrempel-iq lawrencel gbewcyk TrevorSweetland DajHarms akrogsgaard davidmatiqmetrix/,
 
     repo: 'prep' 
   },
@@ -187,6 +195,8 @@ configure({
     end,
 
     continuous_testing: {
+      interval: 2,
+
       ignored_files: [
         /generated/,
         /assembly(_)?info/i,

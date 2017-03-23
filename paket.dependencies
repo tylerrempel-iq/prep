@@ -6,3 +6,7 @@ nuget Machine.Specifications.Runner.TDNet = 0.9.0
 nuget Machine.Specifications.Should = 0.11.0
 nuget Machine.Fakes.Rhinomocks = 2.8.0
 nuget developwithpassion.specifications = 0.7.3
+nuget MySql.ConnectorNET.Data = 6.8.3.2
+nuget Faker.Net = 1.0.3
+nuget Newtonsoft.Json = 10.0.1
+

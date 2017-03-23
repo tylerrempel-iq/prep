@@ -10,18 +10,11 @@ function ch_root(){
   cd $ROOT
 }
 
-#Aliases for thor tasks
-
-alias boweri='root;cd source;npm run-script postinstall'
-#
 #Compile aliases
 alias cs='thor compile:selection'
+alias cw='root;thor compile:web compile_units/web.compile'
 alias ccw='root;thor processes:kill iisexpress node;thor automation:clean;cw'
 alias root=ch_root
-alias automation='root;cd automation'
-
-#Load order aliases
-alias dlo='root;cd source;node dump_load_order'
 
 #Edit a particular compile unit
 alias edit='thor edit:edit $*'
@@ -31,46 +24,105 @@ alias pki='thor paket:install'
 alias pkglv='thor paket:get_latest_version'
 alias pkup='thor paket:update'
 
+#Start the continuous tester
 alias ct='thor continuous_testing:run_it compile_units/all.compile'
+
+#Start growl
 alias grs='thor growl:start'
+
+#Re-expand and resource the dev aliases
 alias exp='root;expands;source aliases'
+
+#Run all of the tests for the main compile unit, exclude slow and seed tags
 alias sr='thor specs:run_them compile_units/all.compile --flags=exclude:slow,seed'
+
+#Run all of the tests for the main compile unit
 alias sra='thor specs:run_them compile_units/all.compile'
 
 #Kill all runner processes
 alias tpkrp='thor processes:kill_runner_processes'
 
-#Test aliases
-alias tcs='thor tests:cs compile_units/all.compile'
-alias tjn='thor tests:node'
-
 #project aliases
-alias fb='thor git:fetch_branch $*'
-alias fl='thor git:fetch_latest $*'
-alias gljp='thor git::get_latest_from_jp'
+alias fb='thor git:fetch_branch $*;edit'
+alias fl='thor git:fetch_latest $*;edit'
+alias gljp='thor git::get_latest_from_jp;edit'
+alias tfl='git add -A;git stash;thor git:fetch_latest $*;git stash pop;edit'
+
+#Add, commit, and push your changes to your personal fork
 alias smc='thor work:save_my_changes'
-alias sne='thor work:start_new_exercise'
+
+#Add and commit your current work onto a branch that you can revisit later, then pull down all of the latest code from the presenter
+alias sne='thor work:start_new_exercise;thor compile:project compile_units/all.compile'
+
+#Show all of the student remotes
 alias str='thor git:student_remotes'
-alias trash='thor git:trash'
-alias rf='bundle install && nuget update -self && nui && thor startup:configure'
+
+#Trash all of the current work on your branch
+alias trash='thor git:trash;edit --compile_unit=compile_units/all.compile'
+
+#Initialize the project
+alias rf='bundle install && thor bootstrap:setup && thor startup:configure'
 
 #Migration aliases
 alias clean='thor automation:clean'
 alias init='thor automation:clean'
-
 alias sia='start_it_all'
 
-function start_it_all(){
-  thor processes:kill_runner_processes
-  thor growl:start
-  thor automation:clean
-  thor automation:init
-  thor run:feature
-  continuous_dev
+function restart_web_app() {
+  tpkrp
+  ccw
+  _powershell ./start_web_app.bat
 }
 
 function _powershell(){
   start powershell -NoExit -WindowStyle normal -Command $*
+}
+
+function docker_stop_all() {
+  for container in $(docker ps -aq); 
+  do
+  docker stop $container
+  docker rm $container
+  done
+}
+
+# Docker workspaces
+
+# Workspace bound to the web.ui node docker environment - no links or service ports will be present
+alias web_ui_bare='docker-compose run --rm --no-deps web_ui'
+
+# Workspace bound to the web.ui node docker environment - includes linked environment and service ports
+alias seeder_workspace='docker-compose run --rm seeder /bin/bash'
+
+
+# Command aliases
+alias mix='docker-compose run --rm seeder mix'
+alias mysql='docker-compose run --rm seeder mysql'
+
+# Aliases used to connect to the app database
+alias db='mysql -u root -h db --password=iqmetrix'
+alias db_dev='db -D iqmetrix'
+
+# General aliases
+# Stop all running docker containers
+alias dsa='docker_stop_all' 
+
+# Run the script to seed the database
+alias seed='mix run priv/repo/seeds.exs' 
+
+# Run the script to rebuild the database
+alias rdb='mix ecto.drop && mix ecto.create && mix ecto.migrate;seed'
+
+# Stop all containers started by this folder docker-compose configuration
+alias down='docker-compose down'
+
+# Restart the web app
+alias rwa=restart_web_app
+
+# Utility alias to run on a clean checkout
+function clean_slate() {
+  docker-compose run --rm seeder ping -c 1 -W 20000 db
+  rdb
 }
 
 <% settings.extra_aliases.each do |the_alias| %>
