@@ -48,7 +48,7 @@ namespace code.utility.iteration
       It can_build_an_expression_tree_to_determine_if_a_number_is_even = () =>
       {
         Func<int, bool> inline = x => x%2 == 0;
-
+        
         var zero = Expression.Constant(0);
         var two = Expression.Constant(2);
         var parameter = Expression.Parameter(typeof(int), "x");
