@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using code.utility.core;
 
 namespace code.utility.iteration
 {
   public static class VisitorExtensions
   {
+    public static Result avg<Element, Result>(this IEnumerable<Element> items,
+      IGetTheValueOfAProperty<Element, Result> accessor)
+    {
+        dynamic result = items.sum(accessor);
+        return result / items.Count();
+    }
+
     public static Result sum<Element, Result>(this IEnumerable<Element> items,
       IGetTheValueOfAProperty<Element, Result> accessor)
     {
