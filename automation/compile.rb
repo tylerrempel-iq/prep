@@ -1,6 +1,5 @@
 module Automation
   module Compile
-
   end
 end
 require_relative 'compile/compile_unit_resolution'

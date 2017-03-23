@@ -13,6 +13,10 @@ module Automation
       base.class_option :dry_run, default: false
     end
 
+    def clean_invoke(command)
+      invoke command, [], {}
+    end
+
     def log?
       options[:log]
     end

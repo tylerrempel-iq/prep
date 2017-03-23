@@ -1,0 +1,16 @@
+{
+  bin_folder: "source/bin",
+  source_path: "source",
+  physical_path: "source",
+  intermediary_path: "web_intermediate",
+  target_path: "web_staging",
+  updateable: true,
+  force: true,
+
+  dependent_compiles: [
+    "compile_units/all.compile"
+  ],
+
+  references: delayed { settings.all_references },
+  target: :library
+}

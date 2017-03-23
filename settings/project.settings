@@ -17,6 +17,9 @@ def filter_libs(libs)
       /mono/i !~ file &&
       /android/i !~ file &&
       /System\./i !~ file &&
+      /SL3/i !~ file &&
+      /WP7/i !~ file &&
+      /\.resources/i !~ file &&
       /Moq/i !~ file
   end
 
@@ -83,9 +86,8 @@ configure({
   },
 
   database: {
-    provider_for_migrations: 'SqlServer2014',
     name: 'code',
-    connection_string: 'Server=(LocalDB)\code;Integrated Security=true' 
+    host: 'localhost'
   },
 
   edit_project_template: 'source/edit.csproj.template',
@@ -107,6 +109,11 @@ configure({
 
   framework_references: [
     "System.dll",
+    "System.Configuration.dll",
+    "System.Data.dll",
+    "System.Security.dll",
+    "System.Xml.dll",
+    "System.Web.dll"
   ],
 
   iis_express: {
@@ -114,7 +121,7 @@ configure({
     present: true,
     enable_in_project_files: true,
     use_for_deploys: true,
-    path: 'e:\utils\iis_express\iisexpress.exe',
+    exe_path: File.expand_path('./automation/tools/iis_express/iisexpress.exe'),
   },
 
   libs: delayed do
@@ -188,6 +195,8 @@ configure({
     end,
 
     continuous_testing: {
+      interval: 2,
+
       ignored_files: [
         /generated/,
         /assembly(_)?info/i,
